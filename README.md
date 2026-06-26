@@ -224,4 +224,84 @@ Pendiente de validar:
 ```text
 Probar la app en un dispositivo Android físico real.
 ```
+---
 
+## Prueba de ubicacion
+
+Se agrego una seccion visual llamada `Location Test` para validar ubicacion como fuente de datos del timeline propio del Proyecto Jupiter.
+
+Dependencias nuevas:
+
+```bash
+npx expo install expo-location expo-task-manager
+```
+
+La app ahora permite:
+
+* pedir permiso de ubicacion en primer plano;
+* obtener la ubicacion actual;
+* iniciar y detener seguimiento en primer plano con `watchPositionAsync`;
+* ver la ultima ubicacion recibida y un historial corto;
+* iniciar, detener y comprobar una task de ubicacion en segundo plano;
+* normalizar cada ubicacion a un evento JSON con `normalizeLocationEvent(location)`.
+
+Formato normalizado:
+
+```json
+{
+  "type": "location",
+  "source": "expo-location",
+  "timestamp": "2026-06-26T12:00:00.000Z",
+  "coords": {
+    "latitude": 28.4636,
+    "longitude": -16.2518,
+    "accuracy": 10
+  }
+}
+```
+
+## Ejecutar despues de los cambios de ubicacion
+
+Como se agregaron permisos nativos y configuracion del plugin `expo-location`, hay que recompilar la Development Build:
+
+```bash
+npx expo run:android
+```
+
+Despues de instalar la nueva build, se puede iniciar Metro con:
+
+```bash
+npx expo start --dev-client
+```
+
+Nota: si mas adelante cambian permisos Android, `app.json`, plugins nativos o `android/app/src/main/AndroidManifest.xml`, hay que recompilar de nuevo la Development Build.
+
+## Probar ubicacion en Android Studio Emulator
+
+1. Abrir el emulador Android.
+2. Abrir `Extended controls`.
+3. Entrar en `Location`.
+4. Enviar una coordenada manual o cargar una ruta GPX/KML.
+5. En la app, pulsar `Obtener ubicacion actual` o `Iniciar seguimiento`.
+6. Para background location, conceder primero foreground y luego background. En Android puede abrirse Ajustes para permitir ubicacion todo el tiempo.
+
+Tambien se puede simular una ubicacion con ADB:
+
+```bash
+adb emu geo fix -16.2518 28.4636
+```
+
+## Probado y pendiente
+
+Probado en codigo:
+
+* ubicacion actual en primer plano con `Location.getCurrentPositionAsync`;
+* seguimiento en primer plano con `Location.watchPositionAsync`;
+* task basica de background location con `TaskManager.defineTask` y `Location.startLocationUpdatesAsync`.
+
+Limitaciones conocidas:
+
+* la task de segundo plano escribe logs en Metro/Logcat, no persiste datos todavia;
+* Android puede limitar la frecuencia real de ubicacion en background;
+* background location requiere permisos nativos y una Development Build recompilada;
+* falta validarlo en un dispositivo Android fisico real.
